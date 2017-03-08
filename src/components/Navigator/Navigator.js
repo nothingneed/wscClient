@@ -1,8 +1,6 @@
 import React, { PropTypes, Component } from 'react'
 import classnames from 'classnames'
 import styles from './Navigator.css'
-import Button from 'antd/lib/button'
-import 'antd/lib/button/style/index.css'
 
 class Navigator extends Component {
 

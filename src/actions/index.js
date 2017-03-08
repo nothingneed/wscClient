@@ -1,10 +1,16 @@
 //这里放置action创建函数
 import * as types from '../constants/ActionTypes'
-import  fetch  from 'isomorphic-fetch'
-function receiveGameList(gameList) {
+
+function receiveAllClients(list) {
   return {
-    type: types.GETGAMELIST_SUCCESS,
-    gameList
+    type: types.CLIENTLIST_SUCCESS,
+    list
+  }
+}
+function receiveDumpLog(log) {
+  return {
+    type: types.DUMPLOG_SUCCESS,
+    log
   }
 }
 
@@ -41,10 +47,46 @@ export function getGameListIfNeeded() {
   }
 }
 
-function getGameList() {
+export function startWscClient() {
+  return (dispatch, getState) => {
+    var ws = new WebSocket('ws://pm2b.com:4096/wsclient')
+    ws.onopen = () => {
+      console.log(`CLIENT connected`)
+
+      let clientId = "controller--" + new Date().toUTCString()
+      let req = {
+        header: "clientInfo",
+        clientId: clientId
+      }
+      ws.send(JSON.stringify(req))
+
+      ws.onmessage = (msg) => {
+        console.log(msg.data);
+        let data = JSON.parse(msg.data)
+        switch(data.header){
+          case 'allClient':
+            dispatch(receiveAllClients(data.clients))
+            break
+          case 'dumpLog':
+            dispatch(receiveDumpLog(data.log))
+            break
+          default:
+            break
+        }
+      }
+
+      ws.send(JSON.stringify({header:'allClient'}));
+    }
+  }
+}
+
+export function getAllClient() {
+
+
   return (dispatch, getState) => {
 
-    // 首次 dispatch：更新应用的 state 来通知请求发起。
+    // 首次 dispatch：更新
+    // 应用的 state 来通知请求发起。
     const filter = getState().catalogFilter
     dispatch(requestGameList()) //注意：因为dispatch接受的参数是action creater的返回对象，所以参数中的函数需要加（），如果不加，在引入thunk中间件后，thunk会错误理解这是一个函数型的返回值，导致既不会报错，也不会正确执行
 
@@ -75,11 +117,17 @@ export function getGameCatalog(catalog) {
   }
 }
 
-//切换catalog
-export function switchCatalogById(id) {
+
+export function SelectClient(id) {
   return {
-    type: types.SWITCH_CATALOG,
+    type: types.SET_CURRENT_CLIENT,
     id
+  }
+}
+export function SelectRegion(region) {
+  return {
+    type: types.SET_CURRENT_REGION,
+    region
   }
 }
 //点击一个联赛筛选  真实环境这里应该是传入联赛id

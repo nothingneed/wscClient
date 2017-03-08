@@ -1,10 +1,14 @@
 import React from 'react'
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import injectTapEventPlugin from 'react-tap-event-plugin';
 
-
-export default function App({ children }) {
+injectTapEventPlugin()
+export default function App(props) {
+    console.log('children-----------' ,props)
   return (
-    <div>
-      <div style={{ marginTop: '1.5em' }}>{children}</div>
-    </div>
+    <MuiThemeProvider>
+
+      <div style={{ marginTop: '1.5em' }}>{props.children}</div>
+    </MuiThemeProvider>
   )
 }
